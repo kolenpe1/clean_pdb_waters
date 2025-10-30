@@ -47,41 +47,57 @@ func main() {
 
     ext := filepath.Ext(inputFile)
     switch ext {
+    
+    // PDB
     case ".pdb":
         fmt.Println("Detected file type: PDB")
+        scanner := bufio.NewScanner(inFile)
+        writer := bufio.NewWriter(outFile)
+
+        fmt.Println("Deleted lines (HOH with zero occupancy):")
+
+        for scanner.Scan() {
+            line := scanner.Text()
+
+            if (strings.HasPrefix(line, "HETATM") || strings.HasPrefix(line, "ATOM") )  && strings.Contains(line[17:20], "HOH") {
+                occupancyStr := strings.TrimSpace(line[54:60])
+                occupancy, err := strconv.ParseFloat(occupancyStr, 64)
+                if err != nil || occupancy == 0.0 {
+                    fmt.Println(line) // Report the deleted line
+                    continue          // Skip writing this line
+                }
+            }
+
+            writer.WriteString(line + "\n")
+        }
+
+        if err := scanner.Err(); err != nil {
+            fmt.Println("Error reading input file:", err)
+        }
+
+        writer.Flush()
+        fmt.Printf("Cleaning complete. Output written to %s\n", outputFile)
+
+
+
     case ".cif":
         fmt.Println("Detected file type: CIF")
+//        scanner := bufio.NewScanner(inFile)
+//        writer := bufio.NewWriter(outFile)
+        
+        fmt.Println("Deleted lines (HOH with zero occupancy):")        
+        
+//        for scanner.Scan() {
+//            line := scanner.Text()
+//        }
+        
     case ".mmcif":
         fmt.Println("Detected file type: mmCIF")
+        return
     default:
         fmt.Printf("Unknown file type: %s\n", ext)
         return
     }
 
-    scanner := bufio.NewScanner(inFile)
-    writer := bufio.NewWriter(outFile)
 
-    fmt.Println("Deleted lines (HOH with zero occupancy):")
-
-    for scanner.Scan() {
-        line := scanner.Text()
-
-        if strings.HasPrefix(line, "HETATM") && strings.Contains(line[17:20], "HOH") {
-            occupancyStr := strings.TrimSpace(line[54:60])
-            occupancy, err := strconv.ParseFloat(occupancyStr, 64)
-            if err != nil || occupancy == 0.0 {
-                fmt.Println(line) // Report the deleted line
-                continue          // Skip writing this line
-            }
-        }
-
-        writer.WriteString(line + "\n")
-    }
-
-    if err := scanner.Err(); err != nil {
-        fmt.Println("Error reading input file:", err)
-    }
-
-    writer.Flush()
-    fmt.Printf("Cleaning complete. Output written to %s\n", outputFile)
 }
