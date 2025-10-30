@@ -79,21 +79,64 @@ func main() {
         fmt.Printf("Cleaning complete. Output written to %s\n", outputFile)
 
 
-
     case ".cif":
         fmt.Println("Detected file type: CIF")
-//        scanner := bufio.NewScanner(inFile)
-//        writer := bufio.NewWriter(outFile)
-        
+        scanner := bufio.NewScanner(inFile)
+        writer := bufio.NewWriter(outFile)
+        position := -1
+        position_search := -1
+
         fmt.Println("Deleted lines (HOH with zero occupancy):")        
         
-//        for scanner.Scan() {
-//            line := scanner.Text()
-//        }
+        for scanner.Scan() {
+            line := scanner.Text()
+            token := strings.Fields(line)
+            if strings.HasPrefix(line, "loop_") {
+                position_search = -1
+            }
+            if strings.HasPrefix(line, "_atom_site.occupancy") {
+                position = position_search
+            }
+            
+            if (strings.HasPrefix(line, "HETATM") || strings.HasPrefix(line, "ATOM")) && token[position] == "0" && strings.Contains(line, "HOH") {
+                fmt.Println(line)
+                continue
+            }
+            
+            writer.WriteString(line + "\n")
+            position_search++
+        }
+        
         
     case ".mmcif":
         fmt.Println("Detected file type: mmCIF")
-        return
+        scanner := bufio.NewScanner(inFile)
+        writer := bufio.NewWriter(outFile)
+        position := -1
+        position_search := -1
+
+        fmt.Println("Deleted lines (HOH with zero occupancy):")        
+        
+        for scanner.Scan() {
+            line := scanner.Text()
+            token := strings.Fields(line)
+            if strings.HasPrefix(line, "loop_") {
+                position_search = -1
+            }
+            if strings.HasPrefix(line, "_atom_site.occupancy") {
+                position = position_search
+            }
+            
+            if (strings.HasPrefix(line, "HETATM") || strings.HasPrefix(line, "ATOM")) && token[position] == "0" && strings.Contains(line, "HOH") {
+                fmt.Println(line)
+                continue
+            }
+            
+            writer.WriteString(line + "\n")
+            position_search++
+        }
+
+
     default:
         fmt.Printf("Unknown file type: %s\n", ext)
         return
