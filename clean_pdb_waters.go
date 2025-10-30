@@ -6,16 +6,27 @@ import (
     "os"
     "strconv"
     "strings"
+    "path/filepath"
+    //"log"
 )
 
 func main() {
-    if len(os.Args) < 2 {
-        fmt.Println("Usage: go run main.go <input.pdb>")
+    if len(os.Args) != 2 {
+        fmt.Println(" ------------------------------------------------------------")
+        fmt.Println(" CLEAN_PDB_WATERS deletes water molecules with zero occupancy")
+        fmt.Println(" Usage: clean_pdb_waters <INPUT>")
+        fmt.Println(" ------------------------------------------------------------")
         return
     }
 
+    // -------------------------
+    // CHECK NUMBER OF ARGUMENTS
+
     inputFile := os.Args[1]
     outputFile := "cleaned_" + inputFile
+
+    // ---------------------
+    // TEST READ/WRITE FILES
 
     inFile, err := os.Open(inputFile)
     if err != nil {
@@ -30,6 +41,22 @@ func main() {
         return
     }
     defer outFile.Close()
+
+    // -------------------------
+    // ANALYZE INPUT FILES
+
+    ext := filepath.Ext(inputFile)
+    switch ext {
+    case ".pdb":
+        fmt.Println("Detected file type: PDB")
+    case ".cif":
+        fmt.Println("Detected file type: CIF")
+    case ".mmcif":
+        fmt.Println("Detected file type: mmCIF")
+    default:
+        fmt.Printf("Unknown file type: %s\n", ext)
+        return
+    }
 
     scanner := bufio.NewScanner(inFile)
     writer := bufio.NewWriter(outFile)
