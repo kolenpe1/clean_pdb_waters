@@ -5,9 +5,12 @@
 
 This tool scans structure file line by line and removes any atom records corresponding to water molecules (`HOH`) that have an occupancy value of `0.00`. The cleaned structure is saved to a new file.
 
+In final stages of structure refinement, questionable waters are repeatedly added and removed. Waters with zero occupancy can be used as flags for maxima in electron density that will not be interpreted.
+
 ## 📦 Requirements
 
-- Go 1.18 or newer
+- Binary file is standalone
+- Go 1.18 or newer for compilation from the source
 
 ## 🔧 Installation
 
